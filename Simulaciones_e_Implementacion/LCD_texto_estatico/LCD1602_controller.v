@@ -12,6 +12,12 @@ module LCD1602_controller #(parameter NUM_COMMANDS = 4,
     output reg [DATA_BITS-1:0] data
 );
 
+
+//logica negada
+wire nready_i;
+assign nready_i = ~ready_i;
+
+
 // Definir los estados de la FSM
 localparam IDLE = 3'b000;
 localparam CONFIG_CMD1 = 3'b001;
@@ -79,7 +85,7 @@ end
 always @(*) begin
     case(fsm_state)
         IDLE: begin
-            next_state <= (ready_i)? CONFIG_CMD1 : IDLE;
+            next_state <= (nready_i)? CONFIG_CMD1 : IDLE;
         end
         CONFIG_CMD1: begin 
             next_state <= (command_counter == NUM_COMMANDS)? WR_STATIC_TEXT_1L : CONFIG_CMD1;
@@ -101,7 +107,7 @@ always @(posedge clk_16ms) begin
     if (reset == 0) begin
         command_counter <= 'b0;
         data_counter <= 'b0;
-		data <= 'b0;
+		  data <= 'b0;
         $readmemh("data.txt", static_data_mem);
     end else begin
         case (next_state)
