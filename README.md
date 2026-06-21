@@ -19,7 +19,36 @@ Indice:
 
 #### Descripción
 
+El módulo LCD1602_controller tiene como función controlar una pantalla LCD 16x2 mediante una máquina de estados finitos (FSM). Su propósito es inicializar la pantalla, configurar sus parámetros de funcionamiento y posteriormente escribir un mensaje almacenado en memoria. Para ello utiliza las señales de control típicas del LCD: RS (selección entre comando y dato), RW (lectura/escritura), Enable y el bus de datos de 8 bits.
+
+El controlador almacena en una memoria interna los caracteres que se mostrarán en la pantalla, los cuales son cargados desde el archivo data.txt utilizando la instrucción $readmemh. Además, dispone de otra memoria que contiene los comandos de configuración necesarios para inicializar el LCD, como la selección del modo de operación de 8 bits, la configuración del cursor y la limpieza de la pantalla.
+
+Para garantizar que el LCD reciba la información con la temporización adecuada, el módulo implementa un divisor de frecuencia que genera una señal de reloj más lenta (clk_16ms). Esta señal es utilizada para sincronizar el avance de la máquina de estados y el envío de comandos y caracteres hacia la pantalla.
+
+Una vez que la señal ready_i indica que el sistema está listo, el controlador comienza la secuencia de inicialización enviando los comandos de configuración. Posteriormente escribe los primeros 16 caracteres en la primera línea del LCD, mueve el cursor al inicio de la segunda línea mediante un comando específico y finalmente escribe los 16 caracteres restantes. Cuando todo el texto ha sido enviado, el sistema retorna al estado de espera. 
+
+La descripción de hardware para el control de la LCD se encuentra en el archivo [lcd1602_text.v](/src/lcd1602_text.v).
+
 #### Diagramas
+
+La Figura 1 presenta la máquina de estados finitos utilizada para controlar el funcionamiento del módulo LCD. Esta FSM organiza de manera secuencial las etapas de inicialización y escritura de información en la pantalla. Cada estado se encarga de una tarea específica, como el envío de comandos de configuración, la escritura de caracteres en cada línea del LCD o la espera de una nueva activación. Las transiciones entre estados dependen principalmente de los contadores de comandos y datos, permitiendo que la información se envíe en el orden correcto y respetando los tiempos de operación requeridos por la pantalla.
+
+<div  align="center">
+    <img src="Imagenes/FSM_LCD_static.png" width="600" height="400">
+    <p>Figura 1. Diagrama de la maquina de estados (FSM) para el control de una pantalla LCD.</p>
+  </div>
+
+Los estados que componen la máquina de estados son los siguientes:
+
+**IDLE:** Estado de reposo. El sistema espera a que la señal ready_i se active. En este estado se reinician los contadores y las salidas de control.
+
+**CONFIG_CMD1:** Se envían los comandos de configuración almacenados en memoria para inicializar correctamente el LCD.
+
+**WR_STATIC_TEXT_1L:** Se escriben secuencialmente los primeros 16 caracteres del mensaje en la primera línea de la pantalla.
+
+**CONFIG_CMD2:** Se envía el comando que posiciona el cursor al inicio de la segunda línea del LCD.
+
+**WR_STATIC_TEXT_2L:** Se escriben los siguientes 16 caracteres en la segunda línea. Una vez finalizada la escritura, el controlador retorna al estado IDLE.
 
 ### Parte 2: Texto dinámico
 
@@ -35,22 +64,15 @@ Indice:
 
 El testbench [lcd1602_TB.v](/src/lcd1602_TB.v) instancia el módulo `LCD1602_controller` con `COUNT_MAX = 50` para acelerar el divisor de reloj de 16 ms, y genera un volcado de formas de onda en [LCD1602_controller_TB.vcd](/src/LCD1602_controller_TB.vcd), visualizado a continuación con GTKWave.
 
-<div  align="center">
-    <img src="Imagenes/tb_full_1parte.png" width="500" height="400">
-    <p>Figura 3. Vista general de la simulación.</p>
-  </div>
-
-La captura muestra el arranque completo de la FSM: tras liberar `reset` y activar `ready_i`, `fsm_state` pasa de `IDLE (000)` a `CONFIG_CMD1 (001)`, donde `command_counter` recorre `0→4` mientras `data` saca, en orden, los cuatro comandos de configuración del LCD (`0x38`, `0x06`, `0x0C`, `0x01`). Justo después, `fsm_state` avanza a `WR_STATIC_TEXT_1L (010)`, `rs` se activa y `data_counter` empieza a incrementarse mientras `data` entrega, byte a byte, el contenido de la primera línea de `static_data_mem` (`0x42 0x61 0x74 0x65 0x72 0x69 0x61 0x20 0x31 0x20 ...`), que corresponde a la cadena `"Bateria 1"` rellenada con espacios.
+Como se observa en la Figura 4, la señal `rs` permanece en bajo durante la fase de envío de comandos, que incluye la secuencia de inicialización del LCD y el comando `START_1LINE` para posicionar el cursor al inicio de la primera línea. Luego, `rs` se pone en alto para indicar que los siguientes bytes corresponden a datos de caracteres, y se envían los caracteres de la primera línea uno por uno, con `enable` replicando el ritmo del reloj de 16 ms. La señal `ready_i` se mantiene en alto durante toda la secuencia, indicando que el controlador está listo para recibir datos, y `rw` permanece en bajo, confirmando que solo se realizan operaciones de escritura.
 
 <div  align="center">
-    <img src="Imagenes/tb_primeraparte.png" width="500" height="400">
-    <p>Figura 4. Detalle del bus de datos en binario.</p>
+    <img src="Imagenes/tb_primeraparte.png" width="700" height="400">
+    <p>Figura 4. Detalle del bus de datos en binario y ASCII.</p>
   </div>
 
 
-Esta segunda vista (en binario, sobre una ventana de tiempo mayor) confirma la misma secuencia ya con `rs` en alto durante toda la fase de escritura de caracteres: se observa el cierre de `"Bateria 1"` con los espacios de relleno (`00100000`), seguido del comando `START_2LINE` (`11000000` = `0xC0`) que reposiciona el cursor en la segunda línea, y a continuación el inicio de la segunda cadena `"Bateria 2"` (`01000010 01100001 01110100 01100101 01110010 ...` = `B a t e r ...`). La señal `enable` replica fielmente a `clk_16ms` (tal como se define con `assign enable = clk_16ms;` en el RTL), y `ready_i`/`rw` permanecen estables en `1`/`0` durante toda la secuencia, como se espera de un controlador de solo escritura.
-
-En conjunto, ambas capturas verifican que la FSM respeta el orden comandos → línea 1 → comando de segunda línea → línea 2, y que los datos enviados coinciden byte a byte con el contenido de `data.txt`.
+En conjunto, las capturas verifican que la FSM respeta el orden: comandos → línea 1 → comando de segunda línea → línea 2, y que los datos enviados coinciden byte a byte con el contenido de `data.txt`.
 
 ### Parte 2: Texto dinámico
 
