@@ -15,7 +15,7 @@ Indice:
 
 ## Diseño implementado
 
-### Parte 1: Texto estatico
+### Parte 1: Texto estático
 
 #### Descripción
 
@@ -60,7 +60,7 @@ Los estados que componen la máquina de estados son los siguientes:
 
 ## Simulaciones 
 
-### Parte 1: Texto estatico
+### Parte 1: Texto estático
 
 El testbench [lcd1602_TB.v](/src/lcd1602_TB.v) instancia el módulo `LCD1602_controller` con `COUNT_MAX = 50` para acelerar el divisor de reloj de 16 ms, y genera un volcado de formas de onda en [LCD1602_controller_TB.vcd](/src/LCD1602_controller_TB.vcd), visualizado a continuación con GTKWave.
 
@@ -78,7 +78,16 @@ En conjunto, las capturas verifican que la FSM respeta el orden: comandos → l�
 
 ## Implementación
 
-### Parte 1: Texto estatico
+### Parte 1: Texto estático
+
+La implementación en la FPGA del texto estático se encuentra en el archivo [falta](falta). Los asignación de pines se encuentra a continuaciíon:
+
+<div  align="center">
+    <img src="./Imagenes/lcdestatico.png" width="500" height="300">
+    <p>Figura 4. Disposición de pines oara la LCD con texto estático en la FPGA.</p>
+  </div>
+
+La evidencia de funcionamiento del módulo LCD se encuentra en el siguiente [video](./Imagenes/Implementacion_PWM_Servo.mp4), donde se muestra el correcto funcionamiento de la LCD junto al mensaje estático guardado en el archivo `data.txt` al ser implementado en la FPGA Cyclone IV.
 
 ### Parte 2: Texto dinámico
 
