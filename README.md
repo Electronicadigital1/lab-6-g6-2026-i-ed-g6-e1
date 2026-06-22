@@ -50,7 +50,44 @@ Los estados que componen la máquina de estados son los siguientes:
 
 **WR_STATIC_TEXT_2L:** Se escriben los siguientes 16 caracteres en la segunda línea. Una vez finalizada la escritura, el controlador retorna al estado IDLE.
 
+
+Adicional también se tiene el siguiente diagrama de flujo.
+
+
+<div  align="center">
+    <img src="./Imagenes/DiagramaDeFlujoP1.png" width="600" height="400">
+    <p>Figura 2. Diagrama de flujo para el control de una pantalla LCD con texto estático.</p>
+  </div>
+
+
 ### Parte 2: Texto dinámico
+
+#### Descripción
+
+El módulo LCD1602_controller_din extiende la funcionalidad del controlador de la Parte 1, permitiendo visualizar contenido dinámico en la pantalla LCD. A diferencia de la Parte 1 donde el mensaje es fijo, este módulo incorpora entradas de selección (text1 y text2) que permiten cambiar el contenido visualizado.
+
+El módulo mantiene la misma máquina de estados fundamental (IDLE, CONFIG_CMD1, WR_STATIC_TEXT_1L, CONFIG_CMD2, WR_STATIC_TEXT_2L) pero incorpora una lógica de selección de datos en memoria. Según cuál entrada esté activada (text1 o text2), se selecciona un conjunto diferente de caracteres almacenados en memoria, permitiendo mostrar dos mensajes distintos de 32 caracteres (16 por línea).
+
+La memoria de datos se organiza con tres secciones: la primera reservada, la segunda contiene el mensaje asociado a text1, y la tercera contiene el mensaje asociado a text2. Cuando el usuario activa una de estas entradas, el controlador accede a la sección correspondiente de memoria y transmite los caracteres hacia la pantalla siguiendo la misma secuencia de inicialización que en la Parte 1.
+De esta forma, el módulo permite una operación interactiva donde el contenido visualizado cambia dinámicamente según las entradas del usuario, sin requerir cambios en la lógica de control ni en la máquina de estados.
+La implementación puede ser apreciada en el siguiente archivo [LCD1602_controller_din.v](./Simulaciones_e_Implementacion/LCD_texto_dinamico/LCD1602_controller_din.v).
+
+#### Diagramas
+
+En este caso se conserva la misma maquina de estados ya que conserva la misma lógica y se me muestra en la siguiente imagen.
+
+<div  align="center">
+    <img src="Imagenes/FSM_LCD_static.png" width="600" height="400">
+    <p>Figura 3. Diagrama de la maquina de estados (FSM) para el control de una pantalla LCD.</p>
+  </div>
+
+Adicionalmente se tiene el siguiente diagrama de flujo muy similar al presentado para un texto estático.
+
+<div  align="center">
+    <img src="./Imagenes/DiagramaDeFlujoP2.png" width="400" height="600">
+    <p>Figura 4. Diagrama de flujo para el control de una pantalla LCD con texto dinámico.</p>
+  </div>
+
 
 ---
 
@@ -64,7 +101,7 @@ Como se observa en la Figura 4, la señal `rs` permanece en bajo durante la fase
 
 <div  align="center">
     <img src="Imagenes/tb_primeraparte.png" width="700" height="400">
-    <p>Figura 4. Detalle del bus de datos en binario y ASCII.</p>
+    <p>Figura 5. Detalle del bus de datos en binario y ASCII.</p>
   </div>
 
 
@@ -76,7 +113,7 @@ Tras realizar la simulación en GTKWave fue posible verificar el comportamiento 
 
 <div  align="center">
     <img src="./Imagenes/Simulacion_texto_dinamico.png" width="700" height="400">
-    <p>Figura 5. Simulación en GTKWave del bus de datos para texto dinámico.</p>
+    <p>Figura 6. Simulación en GTKWave del bus de datos para texto dinámico.</p>
   </div>
 
 El codigo del testbench se encuentra en el archivo [LCD1602_controller_din_tb.v](./Simulaciones_e_Implementacion/LCD_texto_dinamico/LCD1602_controller_din_tb.v)
@@ -91,7 +128,7 @@ La implementación en la FPGA del texto estático se encuentra en el archivo [LC
 
 <div  align="center">
     <img src="./Imagenes/lcdestatico.png" width="500" height="300">
-    <p>Figura 6. Disposición de pines oara la LCD con texto estático en la FPGA.</p>
+    <p>Figura 7. Disposición de pines oara la LCD con texto estático en la FPGA.</p>
   </div>
 
 La evidencia de funcionamiento del módulo LCD se encuentra en el siguiente [video](./Imagenes/Implementacion_PWM_Servo.mp4), donde se muestra el correcto funcionamiento de la LCD junto al mensaje estático guardado en el archivo `data.txt` al ser implementado en la FPGA Cyclone IV.
@@ -102,7 +139,7 @@ El texto a mostrar se carga desde un archivo de texto externo ([data.txt](./Simu
 
 <div  align="center">
     <img src="./Imagenes/Disposicion_de_pines_texto_din.jpeg" width="500" height="300">
-    <p>Figura 7. Disposición de pines de la LCD con texto dinámico.</p>
+    <p>Figura 8. Disposición de pines de la LCD con texto dinámico.</p>
   </div>
 
 La evidencia de funcionamiento de la implementación se encuentra en el siguiente [video](./Imagenes/Implementacion_texto_dinamico.mp4).
