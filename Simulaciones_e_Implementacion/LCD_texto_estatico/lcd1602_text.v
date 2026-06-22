@@ -51,7 +51,7 @@ initial begin
     data <= 8'b0;
     clk_16ms <= 1'b0;
     clk_counter <= 'b0;
-    $readmemh("path_to_txt.txt", static_data_mem);    
+    $readmemh("data.txt", static_data_mem);    
 	config_mem[0] <= LINES2_MATRIX5x8_MODE8bit;
 	config_mem[1] <= SHIFT_CURSOR_RIGHT;
 	config_mem[2] <= DISPON_CURSOROFF;
@@ -101,8 +101,8 @@ always @(posedge clk_16ms) begin
     if (reset == 0) begin
         command_counter <= 'b0;
         data_counter <= 'b0;
-		  data <= 'b0;
-        $readmemh("path_to_txt.txt", static_data_mem);
+		data <= 'b0;
+        $readmemh("data.txt", static_data_mem);
     end else begin
         case (next_state)
             IDLE: begin

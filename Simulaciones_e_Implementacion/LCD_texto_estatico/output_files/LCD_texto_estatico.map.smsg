@@ -1,0 +1,1 @@
+Warning (10268): Verilog HDL information at LCD1602_controller.v(86): always construct contains both blocking and non-blocking assignments File: C:/Users/Usuario/Documents/GitHub/lab-6-g6-2026-i-ed-g6-e1/Simulaciones_e_Implementacion/LCD_texto_estatico/LCD1602_controller.v Line: 86
