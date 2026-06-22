@@ -101,7 +101,7 @@ always @(posedge clk_16ms) begin
     if (reset == 0) begin
         command_counter <= 'b0;
         data_counter <= 'b0;
-		data <= 'b0;
+		  data <= 'b0;
         $readmemh("data.txt", static_data_mem);
     end else begin
         case (next_state)

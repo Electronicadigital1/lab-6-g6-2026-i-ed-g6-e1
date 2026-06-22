@@ -1,16 +1,28 @@
-module LCD1602_controller #(parameter NUM_COMMANDS = 4, 
-                                      NUM_DATA_ALL = 32,  
+module LCD1602_controller_din #(parameter NUM_COMMANDS = 4, 
+                                      NUM_DATA_ALL = 96,  
                                       NUM_DATA_PERLINE = 16,
                                       DATA_BITS = 8,
-                                      COUNT_MAX = 800000)(
+                                      COUNT_MAX = 800000,
+                                      TEXT2_BEGIN = 64,
+                                      TEXT1_BEGIN = 32)(
     input clk,            
     input reset,          
     input ready_i,
+    input text1, text2,
     output reg rs,        
     output reg rw,
     output enable,    
     output reg [DATA_BITS-1:0] data
 );
+
+reg [$clog2(TEXT2_BEGIN):0] inicio;
+
+//logica negada
+wire nready_i, ntext1, ntext2;
+assign nready_i = ~ready_i;
+assign ntext1 = ~text1;
+assign ntext2 = ~text2;
+
 
 // Definir los estados de la FSM
 localparam IDLE = 3'b000;
@@ -58,6 +70,16 @@ initial begin
 	config_mem[3] <= CLEAR_DISPLAY;
 end
 
+always @(*) begin
+    if(ntext1) begin
+        inicio = TEXT1_BEGIN;
+    end else if (ntext2) begin
+        inicio = TEXT2_BEGIN;
+    end else begin
+        inicio = 'b0;
+    end
+end
+
 always @(posedge clk) begin
     if (clk_counter == COUNT_MAX-1) begin
         clk_16ms <= ~clk_16ms;
@@ -79,7 +101,7 @@ end
 always @(*) begin
     case(fsm_state)
         IDLE: begin
-            next_state <= (ready_i)? CONFIG_CMD1 : IDLE;
+            next_state <= (nready_i)? CONFIG_CMD1 : IDLE;
         end
         CONFIG_CMD1: begin 
             next_state <= (command_counter == NUM_COMMANDS)? WR_STATIC_TEXT_1L : CONFIG_CMD1;
@@ -101,7 +123,7 @@ always @(posedge clk_16ms) begin
     if (reset == 0) begin
         command_counter <= 'b0;
         data_counter <= 'b0;
-		data <= 'b0;
+		  data <= 'b0;
         $readmemh("data.txt", static_data_mem);
     end else begin
         case (next_state)
@@ -119,7 +141,7 @@ always @(posedge clk_16ms) begin
             WR_STATIC_TEXT_1L: begin
                 data_counter <= data_counter + 1;
                 rs <= 1'b1; 
-				data <= static_data_mem[data_counter];
+				data <= static_data_mem[inicio + data_counter];
             end
             CONFIG_CMD2: begin
                 data_counter <= 'b0;
@@ -129,7 +151,7 @@ always @(posedge clk_16ms) begin
 			WR_STATIC_TEXT_2L: begin
                 data_counter <= data_counter + 1;
                 rs <= 1'b1; 
-				data <= static_data_mem[NUM_DATA_PERLINE + data_counter];
+				data <= static_data_mem[inicio + NUM_DATA_PERLINE + data_counter];
             end
         endcase
     end

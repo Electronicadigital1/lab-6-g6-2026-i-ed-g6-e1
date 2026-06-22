@@ -57,9 +57,6 @@ Los estados que componen la máquina de estados son los siguientes:
 
 #### Diagramas
 
-
-## Simulaciones 
-
 ### Parte 1: Texto estático
 
 El testbench [lcd1602_TB.v](/src/lcd1602_TB.v) instancia el módulo `LCD1602_controller` con `COUNT_MAX = 50` para acelerar el divisor de reloj de 16 ms, y genera un volcado de formas de onda en [LCD1602_controller_TB.vcd](/src/LCD1602_controller_TB.vcd), visualizado a continuación con GTKWave.
@@ -76,6 +73,16 @@ En conjunto, las capturas verifican que la FSM respeta el orden: comandos → l�
 
 ### Parte 2: Texto dinámico
 
+Tras realizar la simulación en GTKWave fue posible verificar el comportamiento de la máquina de estados y la correcta secuencia de señales enviadas a la LCD. Se observó inicialmente el envío de los comandos de configuración, seguido de la transmisión ordenada de los caracteres de la primera y segunda línea. Además, se comprobó el funcionamiento de los contadores y la actualización adecuada de las señales RS, Enable y del bus de datos. En la siguiente figura se muestra el bus de dato enviado por la LCD en codigo binario y en codigo ASCII.
+
+<div  align="center">
+    <img src="./Imagenes/Simulacion_texto_dinamico.png" width="500" height="200">
+    <p>Figura 5. Simulación en GTKWave del bus de datos para texto dinámico.</p>
+  </div>
+
+El codigo del testbench se encuentra en el archivo [LCD1602_controller_din_tb.v](./Simulaciones_e_Implementacion/LCD_texto_dinamico/LCD1602_controller_din_tb.v)
+
+
 ## Implementación
 
 ### Parte 1: Texto estático
@@ -84,14 +91,24 @@ La implementación en la FPGA del texto estático se encuentra en el archivo [fa
 
 <div  align="center">
     <img src="./Imagenes/lcdestatico.png" width="500" height="300">
-    <p>Figura 4. Disposición de pines oara la LCD con texto estático en la FPGA.</p>
+    <p>Figura 6. Disposición de pines oara la LCD con texto estático en la FPGA.</p>
   </div>
 
 La evidencia de funcionamiento del módulo LCD se encuentra en el siguiente [video](./Imagenes/Implementacion_PWM_Servo.mp4), donde se muestra el correcto funcionamiento de la LCD junto al mensaje estático guardado en el archivo `data.txt` al ser implementado en la FPGA Cyclone IV.
 
 ### Parte 2: Texto dinámico
 
+El texto a mostrar se carga desde un archivo de texto externo ([data.txt](./Simulaciones_e_Implementacion/LCD_texto_dinamico/data.txt)) mediante $readmemh, permitiendo modificar el contenido sin alterar la estructura del controlador. El diseño se integró con la FPGA y la pantalla LCD 1602, verificando experimentalmente la correcta lectura de los caracteres y la adecuada secuencia de inicialización del dispositivo.
+
+<div  align="center">
+    <img src="./Imagenes/Disposicion_de_pines_texto_din.jpeg" width="500" height="200">
+    <p>Figura 7. Disposición de pines de la LCD con texto dinámico.</p>
+  </div>
+
+La evidencia de funcionamiento de la implementación se encuentra en el siguiente [video](./Imagenes/Implementacion_texto_dinamico.mp4).
+
 ## Conclusiones
 
+- El desarrollo de este laboratorio permitió comprender el uso de las máquinas de estados y la lógica secuencial en el diseño de sistemas digitales orientados al control de dispositivos externos. A través del uso de contadores, memorias y señales de control, fue posible implementar un controlador para una pantalla LCD 1602 capaz de gestionar la inicialización y la visualización de texto, permitiendo actualizar y seleccionar la información mostrada de manera organizada y eficiente.
 
 ## Referencias
