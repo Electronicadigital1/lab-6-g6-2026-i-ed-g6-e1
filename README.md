@@ -52,6 +52,11 @@ El codigo del testbench se encuentra en el archivo [LCD1602_controller_din_tb.v]
 
 El texto a mostrar se carga desde un archivo de texto externo ([data.txt](./Simulaciones_e_Implementacion/LCD_texto_dinamico/data.txt)) mediante $readmemh, permitiendo modificar el contenido sin alterar la estructura del controlador. El diseño se integró con la FPGA y la pantalla LCD 1602, verificando experimentalmente la correcta lectura de los caracteres y la adecuada secuencia de inicialización del dispositivo.
 
+<div  align="center">
+    <img src="./Imagenes/Disposicion_de_pines_texto_din.jpeg" width="500" height="200">
+    <p>Figura 7. Disposición de pines de la LCD con texto dinámico.</p>
+  </div>
+
 La evidencia de funcionamiento de la implementación se encuentra en el siguiente [video](./Imagenes/Implementacion_texto_dinamico.mp4).
 
 ## Conclusiones
