@@ -66,7 +66,7 @@ Adicional también se tiene el siguiente diagrama de flujo.
 
 El módulo LCD1602_controller_din extiende la funcionalidad del controlador de la Parte 1, permitiendo visualizar contenido dinámico en la pantalla LCD. A diferencia de la Parte 1 donde el mensaje es fijo, este módulo incorpora entradas de selección (text1 y text2) que permiten cambiar el contenido visualizado.
 
-El módulo mantiene la misma máquina de estados fundamental (IDLE, CONFIG_CMD1, WR_STATIC_TEXT_1L, CONFIG_CMD2, WR_STATIC_TEXT_2L) pero incorpora una lógica de selección de datos en memoria. Según cuál entrada esté activada (text1 o text2), se selecciona un conjunto diferente de caracteres almacenados en memoria, permitiendo mostrar dos mensajes distintos de 32 caracteres (16 por línea).
+El módulo mantiene la misma máquina de estados fundamental (IDLE, CONFIG_CMD1, WR_STATIC_TEXT_1L, CONFIG_CMD2, WR_STATIC_TEXT_2L) pero incorpora una lógica de selección de datos en memoria. Dependiendo de cual entrada esté activada (text1 o text2), se selecciona un conjunto diferente de caracteres almacenados en memoria, permitiendo mostrar dos mensajes distintos de 32 caracteres (16 por línea).
 
 La memoria de datos se organiza con tres secciones: la primera reservada, la segunda contiene el mensaje asociado a text1, y la tercera contiene el mensaje asociado a text2. Cuando el usuario activa una de estas entradas, el controlador accede a la sección correspondiente de memoria y transmite los caracteres hacia la pantalla siguiendo la misma secuencia de inicialización que en la Parte 1.
 De esta forma, el módulo permite una operación interactiva donde el contenido visualizado cambia dinámicamente según las entradas del usuario, sin requerir cambios en la lógica de control ni en la máquina de estados.
@@ -74,7 +74,7 @@ La implementación puede ser apreciada en el siguiente archivo [LCD1602_controll
 
 #### Diagramas
 
-En este caso se conserva la misma maquina de estados ya que conserva la misma lógica y se me muestra en la siguiente imagen.
+En este caso se conserva la misma maquina de estados ya que conserva la misma lógica y se muestra en la siguiente imagen.
 
 <div  align="center">
     <img src="Imagenes/FSM_LCD_static.png" width="600" height="400">
